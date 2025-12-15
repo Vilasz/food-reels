@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  name          String?
+  avatar        String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  videos        Video[]
+  likes         Like[]
+  comments      Comment[]
+  views         VideoView[]
+  analytics     AnalyticsEvent[]
+}
+
+model Video {
+  id              String    @id @default(cuid())
+  title           String
+  description     String?
+  videoUrl        String    // URL to video file (S3, Cloudinary, etc.)
+  thumbnailUrl    String?   // Thumbnail image URL
+  duration        Int?      // Duration in seconds
+  
+  // Food-related fields
+  foodItemId      String?   @unique
+  foodItem        FoodItem? @relation(fields: [foodItemId], references: [id])
+  
+  // Creator
+  creatorId       String
+  creator         User      @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  
+  // Engagement metrics
+  likesCount      Int       @default(0)
+  commentsCount   Int       @default(0)
+  viewsCount      Int       @default(0)
+  sharesCount     Int       @default(0)
+  
+  // Metadata
+  isActive        Boolean   @default(true)
+  contentType     String    @default("video") // "video" or "photo" for A/B testing
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  likes           Like[]
+  comments        Comment[]
+  views           VideoView[]
+  analyticsEvents AnalyticsEvent[]
+}
+
+model FoodItem {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  price           Float?
+  currency        String    @default("BRL")
+  imageUrl        String?
+  
+  // External marketplace links
+  ifoodUrl        String?
+  storeUrl        String?
+  otherMarketplaceUrls Json? // Flexible JSON for other marketplaces
+  
+  // Category and tags
+  category        String?
+  tags            String[]  // Array of tags
+  
+  // Location (for local stores)
+  restaurantName  String?
+  location        String?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  video           Video?
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  videoId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, videoId])
+  @@index([videoId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  videoId   String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([videoId])
+}
+
+model VideoView {
+  id        String   @id @default(cuid())
+  userId    String?
+  videoId   String
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  watchedDuration Int? // How long they watched (seconds)
+  completed Boolean  @default(false) // Did they watch the full video?
+  createdAt DateTime @default(now())
+  
+  @@index([videoId])
+  @@index([userId])
+}
+
+// Analytics for A/B testing: video vs photo effectiveness
+model AnalyticsEvent {
+  id            String   @id @default(cuid())
+  eventType     String   // "view", "like", "comment", "click_food_link", "purchase", "share", etc.
+  userId        String?
+  videoId       String?
+  foodItemId    String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  video         Video?   @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  
+  // Event metadata
+  metadata      Json?    // Flexible JSON for additional event data (e.g., { "marketplace": "ifood", "clickTime": 1234 })
+  contentType   String?  // "video" or "photo" - for A/B testing
+  source        String?  // "ifood", "store", "direct", etc.
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([eventType])
+  @@index([videoId])
+  @@index([userId])
+  @@index([contentType])
+  @@index([createdAt])
+}
+
+// Store configuration for marketplace integrations
+model Store {
+  id            String   @id @default(cuid())
+  name          String
+  type          String   // "ifood", "restaurant", "marketplace", etc.
+  apiEndpoint   String?  // API endpoint for integration
+  apiKey        String?  // Encrypted API key
+  isActive      Boolean  @default(true)
+  config        Json?    // Flexible configuration
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
