@@ -4,8 +4,11 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import VideoPlayer from './VideoPlayer'
 import VideoActions from './VideoActions'
 import FoodItemCard from './FoodItemCard'
+import VideoNavigation from './VideoNavigation'
+import VideoList from './VideoList'
 import { VideoWithRelations } from '@/lib/types'
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FiList, FiSearch, FiX } from 'react-icons/fi'
 
 interface VideoFeedProps {
   videos: VideoWithRelations[]
@@ -14,11 +17,14 @@ interface VideoFeedProps {
 export default function VideoFeed({ videos }: VideoFeedProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
+  const [showVideoList, setShowVideoList] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const touchStartY = useRef<number>(0)
   const touchEndY = useRef<number>(0)
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>()
-  const y = useMotionValue(0)
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const overlayOpen = showVideoList || showSearch
 
   // Track video views
   const trackView = useCallback(async (videoId: string) => {
@@ -37,20 +43,25 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
   }, [currentIndex, videos, trackView])
 
   // Smooth scroll navigation
-  const navigateToVideo = useCallback((index: number) => {
-    if (index < 0 || index >= videos.length || isScrolling) return
-    
-    setIsScrolling(true)
-    setCurrentIndex(index)
-    
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current)
-    }
-    
-    scrollTimeoutRef.current = setTimeout(() => {
-      setIsScrolling(false)
-    }, 600)
-  }, [videos.length, isScrolling])
+  const navigateToVideo = useCallback(
+    (index: number, opts?: { force?: boolean }) => {
+      const force = opts?.force ?? false
+      if (index < 0 || index >= videos.length) return
+      if (isScrolling && !force) return
+
+      setIsScrolling(true)
+      setCurrentIndex(index)
+
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current)
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false)
+      }, 450)
+    },
+    [videos.length, isScrolling]
+  )
 
   // Prevent default scroll behavior and handle navigation
   useEffect(() => {
@@ -58,6 +69,7 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
     if (!container) return
 
     const handleWheel = (e: WheelEvent) => {
+      if (overlayOpen) return
       e.preventDefault()
       if (isScrolling) return
 
@@ -76,15 +88,18 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
     }
 
     const handleTouchStart = (e: TouchEvent) => {
+      if (overlayOpen) return
       touchStartY.current = e.touches[0].clientY
     }
 
     const handleTouchMove = (e: TouchEvent) => {
-      // Prevent default to avoid page scroll
+      if (overlayOpen) return
+      // Prevent default to avoid page scroll (but keep it disabled while overlays are open)
       e.preventDefault()
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
+      if (overlayOpen) return
       touchEndY.current = e.changedTouches[0].clientY
       handleSwipe()
     }
@@ -108,6 +123,7 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
 
     // Keyboard navigation
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (overlayOpen) return
       if (e.key === 'ArrowDown' && currentIndex < videos.length - 1) {
         e.preventDefault()
         navigateToVideo(currentIndex + 1)
@@ -133,7 +149,7 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
         clearTimeout(scrollTimeoutRef.current)
       }
     }
-  }, [currentIndex, videos.length, isScrolling, navigateToVideo])
+  }, [currentIndex, videos.length, isScrolling, navigateToVideo, overlayOpen])
 
   if (videos.length === 0) {
     return (
@@ -143,8 +159,46 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
     )
   }
 
-  const currentVideo = videos[currentIndex]
-  const opacity = useTransform(y, [-100, 0, 100], [0, 1, 0])
+  // Filter videos based on search
+  const filteredVideos = searchQuery
+    ? videos.filter(
+        (video) =>
+          video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          video.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          video.foodItem?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : videos
+
+  // Find current video's position in filtered list
+  const currentVideoInFiltered = filteredVideos.findIndex(v => v.id === videos[currentIndex]?.id)
+  const displayIndex = currentVideoInFiltered >= 0 ? currentVideoInFiltered : 0
+  const currentVideo = filteredVideos[displayIndex] || videos[currentIndex] || videos[0]
+
+  const handlePrevious = () => {
+    if (displayIndex > 0) {
+      const prevVideo = filteredVideos[displayIndex - 1]
+      const newIndex = videos.findIndex(v => v.id === prevVideo.id)
+      if (newIndex >= 0) {
+        navigateToVideo(newIndex, { force: true })
+      }
+    } else if (!searchQuery && currentIndex > 0) {
+      // If no search, navigate normally
+      navigateToVideo(currentIndex - 1, { force: true })
+    }
+  }
+
+  const handleNext = () => {
+    if (displayIndex < filteredVideos.length - 1) {
+      const nextVideo = filteredVideos[displayIndex + 1]
+      const newIndex = videos.findIndex(v => v.id === nextVideo.id)
+      if (newIndex >= 0) {
+        navigateToVideo(newIndex, { force: true })
+      }
+    } else if (!searchQuery && currentIndex < videos.length - 1) {
+      // If no search, navigate normally
+      navigateToVideo(currentIndex + 1, { force: true })
+    }
+  }
 
   return (
     <div
@@ -217,7 +271,7 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
       </AnimatePresence>
 
       {/* Scroll indicator */}
-      {currentIndex < videos.length - 1 && !isScrolling && (
+      {(displayIndex < filteredVideos.length - 1 || (!searchQuery && currentIndex < videos.length - 1)) && !isScrolling && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -228,15 +282,94 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
             animate={{ y: [0, 10, 0] }}
             transition={{ repeat: Infinity, duration: 1.5 }}
           >
-            ↓ Swipe up
+            ↓ Swipe up or use arrows
           </motion.div>
         </motion.div>
       )}
 
-      {/* Video counter */}
-      <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-white text-xs z-20">
-        {currentIndex + 1} / {videos.length}
+      {/* Top navigation bar */}
+      <div className="absolute top-0 left-0 right-0 p-4 z-30 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h1 className="text-white text-xl font-bold">Food Reels</h1>
+            {searchQuery && (
+              <span className="text-white/60 text-sm bg-white/10 px-2 py-1 rounded">
+                {filteredVideos.length} {filteredVideos.length === 1 ? 'result' : 'results'}
+              </span>
+            )}
+          </div>
+
+        <div className="flex items-center gap-2">
+          {/* Search button */}
+          <motion.button
+            onClick={() => setShowSearch(!showSearch)}
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Search"
+          >
+            <FiSearch className="w-5 h-5 text-white" />
+          </motion.button>
+
+          {/* Video list button */}
+          <motion.button
+            onClick={() => setShowVideoList(true)}
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Show video list"
+          >
+            <FiList className="w-5 h-5 text-white" />
+          </motion.button>
+        </div>
       </div>
+
+      {/* Search bar */}
+      {showSearch && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="absolute top-16 left-4 right-4 z-30"
+        >
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search videos, food items..."
+              className="w-full bg-black/80 backdrop-blur-md border border-white/20 rounded-lg px-4 py-3 pr-10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+              autoFocus
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Navigation buttons */}
+      <VideoNavigation
+        currentIndex={displayIndex}
+        totalVideos={filteredVideos.length}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        canGoPrevious={displayIndex > 0 || (!searchQuery && currentIndex > 0)}
+        canGoNext={displayIndex < filteredVideos.length - 1 || (!searchQuery && currentIndex < videos.length - 1)}
+      />
+
+      {/* Video list panel */}
+      <VideoList
+        videos={videos}
+        currentIndex={currentIndex}
+        onSelectVideo={(index) => navigateToVideo(index, { force: true })}
+        isOpen={showVideoList}
+        onClose={() => setShowVideoList(false)}
+      />
     </div>
   )
 }

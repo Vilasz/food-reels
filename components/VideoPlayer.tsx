@@ -14,15 +14,19 @@ export default function VideoPlayer({ video, isActive = true, onViewComplete }: 
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(true)
   const [played, setPlayed] = useState(0)
+  const [error, setError] = useState(false)
   const playerRef = useRef<ReactPlayer>(null)
+  const isPhoto =
+    video.contentType === 'photo' ||
+    /\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(video.videoUrl)
 
   useEffect(() => {
     if (isActive) {
-      setPlaying(true)
+      if (!isPhoto) setPlaying(true)
     } else {
       setPlaying(false)
     }
-  }, [isActive])
+  }, [isActive, isPhoto])
 
   const handleProgress = (state: { played: number, playedSeconds: number }) => {
     setPlayed(state.played)
@@ -42,6 +46,66 @@ export default function VideoPlayer({ video, isActive = true, onViewComplete }: 
     setMuted(!muted)
   }
 
+  const handleError = () => {
+    setError(true)
+    console.error('Video failed to load:', video.videoUrl)
+  }
+
+  // Photo posts (for validation: images of dishes)
+  if (isPhoto) {
+    return (
+      <div className="relative w-full h-full bg-black">
+        <img
+          src={video.videoUrl}
+          alt={video.title}
+          className="w-full h-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 p-4 flex items-end justify-between">
+          <div className="text-white space-y-1">
+            <p className="text-lg font-semibold line-clamp-2">{video.title}</p>
+            {video.description && (
+              <p className="text-sm text-white/80 line-clamp-2">{video.description}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state if video fails to load
+  if (error) {
+    return (
+      <div className="relative w-full h-full bg-black flex items-center justify-center">
+        {video.thumbnailUrl ? (
+          <div className="relative w-full h-full">
+            <img
+              src={video.thumbnailUrl}
+              alt={video.title}
+              className="w-full h-full object-cover opacity-50"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">
+              <svg className="w-16 h-16 mb-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <p className="text-lg font-semibold mb-2">Video unavailable</p>
+              <p className="text-sm text-white/70 text-center">Unable to load video. Showing thumbnail instead.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center p-4">
+            <svg className="w-16 h-16 mx-auto mb-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <p className="text-white text-lg font-semibold mb-2">Video unavailable</p>
+            <p className="text-white/70 text-sm">Unable to load video</p>
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="relative w-full h-full bg-black">
       <div 
@@ -59,6 +123,7 @@ export default function VideoPlayer({ video, isActive = true, onViewComplete }: 
           height="100%"
           style={{ objectFit: 'cover' }}
           onProgress={handleProgress}
+          onError={handleError}
           config={{
             file: {
               attributes: {
