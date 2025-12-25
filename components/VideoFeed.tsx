@@ -241,9 +241,9 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
             {/* Gradient overlay for better text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
             
-            <div className="absolute bottom-0 left-0 right-0 p-4 pb-20 z-10">
-              <div className="flex justify-between items-end gap-4">
-                <div className="flex-1 min-w-0">
+            <div className="absolute bottom-0 left-0 right-0 p-4 pb-24 md:pb-20 z-10">
+              <div className="flex flex-col md:flex-row items-start md:items-end gap-4 md:gap-6">
+                <div className="flex-1 min-w-0 w-full">
                   <div className="flex items-center gap-2 mb-2">
                     {currentVideo.creator.avatar && (
                       <img
@@ -263,7 +263,9 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
                     <FoodItemCard foodItem={currentVideo.foodItem} />
                   )}
                 </div>
-                <VideoActions video={currentVideo} />
+                <div className="w-full md:w-auto flex justify-end">
+                  <VideoActions video={currentVideo} />
+                </div>
               </div>
             </div>
           </div>
@@ -289,14 +291,14 @@ export default function VideoFeed({ videos }: VideoFeedProps) {
 
       {/* Top navigation bar */}
       <div className="absolute top-0 left-0 right-0 p-4 z-30 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-white text-xl font-bold">Food Reels</h1>
-            {searchQuery && (
-              <span className="text-white/60 text-sm bg-white/10 px-2 py-1 rounded">
-                {filteredVideos.length} {filteredVideos.length === 1 ? 'result' : 'results'}
-              </span>
-            )}
-          </div>
+        <div className="flex items-center gap-2">
+          <h1 className="text-white text-xl font-bold">Food Reels</h1>
+          {searchQuery && (
+            <span className="text-white/60 text-sm bg-white/10 px-2 py-1 rounded">
+              {filteredVideos.length} {filteredVideos.length === 1 ? 'result' : 'results'}
+            </span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           {/* Search button */}

@@ -95,12 +95,12 @@ export default function VideoActions({ video }: VideoActionsProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex md:flex-col flex-row items-center justify-end gap-4 md:gap-6 bg-black/30 md:bg-transparent px-3 py-2 md:px-0 md:py-0 rounded-full md:rounded-none backdrop-blur-sm md:backdrop-blur-0 border border-white/5 md:border-0">
       {/* Like button */}
       <div className="flex flex-col items-center">
         <button
           onClick={handleLike}
-          className="w-12 h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
+          className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
           aria-label={isLiked ? 'Unlike' : 'Like'}
         >
           {isLiked ? (
@@ -118,7 +118,7 @@ export default function VideoActions({ video }: VideoActionsProps) {
       <div className="flex flex-col items-center">
         <button
           onClick={handleComment}
-          className="w-12 h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
+          className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
           aria-label="Comments"
         >
           <FiMessageCircle className="w-6 h-6 text-white" />
@@ -132,7 +132,7 @@ export default function VideoActions({ video }: VideoActionsProps) {
       <div className="flex flex-col items-center">
         <button
           onClick={handleShare}
-          className="w-12 h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
+          className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
           aria-label="Share"
         >
           <FiShare2 className="w-6 h-6 text-white" />
@@ -144,7 +144,7 @@ export default function VideoActions({ video }: VideoActionsProps) {
 
       {/* More options */}
       <button
-        className="w-12 h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
+        className="w-11 h-11 md:w-12 md:h-12 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
         aria-label="More options"
       >
         <FiMoreVertical className="w-6 h-6 text-white" />

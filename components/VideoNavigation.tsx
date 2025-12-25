@@ -21,7 +21,7 @@ export default function VideoNavigation({
   canGoNext,
 }: VideoNavigationProps) {
   return (
-    <div className="absolute left-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3">
+    <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-30 hidden sm:flex flex-col gap-3">
       {/* Previous button */}
       <motion.button
         onClick={onPrevious}

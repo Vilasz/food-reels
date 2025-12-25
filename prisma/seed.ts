@@ -5,228 +5,140 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Seeding database...')
 
-  // Create demo users
-  const user1 = await prisma.user.upsert({
-    where: { email: 'chef@example.com' },
+  // Create Donburizin chef user
+  const donburizinChef = await prisma.user.upsert({
+    where: { email: 'chef@donburizin.com' },
     update: {},
     create: {
-      email: 'chef@example.com',
-      username: 'chef_mario',
-      name: 'Chef Mario',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=chef',
-      bio: 'Professional chef sharing amazing recipes',
-    },
-  })
-
-  const user2 = await prisma.user.upsert({
-    where: { email: 'foodie@example.com' },
-    update: {},
-    create: {
-      email: 'foodie@example.com',
-      username: 'foodie_lover',
-      name: 'Foodie Lover',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=foodie',
-      bio: 'Love trying new foods!',
+      email: 'chef@donburizin.com',
+      username: 'donburizin_oficial',
+      name: 'Donburizin',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=donburizin',
+      bio: 'Culinária japonesa autêntica 🍣 | Peça já pelo nosso app!',
     },
   })
 
   console.log('✅ Created users')
 
-  // Create food items
-  const pizza = await prisma.foodItem.upsert({
-    where: { id: 'pizza-1' },
+  // Create food items for Donburizin
+  const tunaSando = await prisma.foodItem.upsert({
+    where: { id: 'tuna-sando-1' },
     update: {},
     create: {
-      id: 'pizza-1',
-      name: 'Margherita Pizza',
-      description: 'Classic Italian pizza with fresh mozzarella, tomato sauce, and basil',
-      price: 35.90,
-      currency: 'BRL',
-      category: 'Pizza',
-      tags: ['pizza', 'italian', 'vegetarian'],
-      restaurantName: 'Pizzaria Bella',
-      location: 'São Paulo, SP',
-      ifoodUrl: 'https://www.ifood.com.br/pizza-margherita',
-      imageUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400',
-    },
-  })
-
-  const burger = await prisma.foodItem.upsert({
-    where: { id: 'burger-1' },
-    update: {},
-    create: {
-      id: 'burger-1',
-      name: 'Gourmet Burger',
-      description: 'Juicy beef patty with cheddar, bacon, lettuce, and special sauce',
-      price: 28.50,
-      currency: 'BRL',
-      category: 'Burger',
-      tags: ['burger', 'beef', 'gourmet'],
-      restaurantName: 'Burger House',
-      location: 'Rio de Janeiro, RJ',
-      ifoodUrl: 'https://www.ifood.com.br/gourmet-burger',
-      storeUrl: 'https://burgerhouse.com.br/menu/gourmet-burger',
-      imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
-    },
-  })
-
-  const sushi = await prisma.foodItem.upsert({
-    where: { id: 'sushi-1' },
-    update: {},
-    create: {
-      id: 'sushi-1',
-      name: 'Salmon Sashimi Set',
-      description: 'Fresh salmon sashimi with rice, miso soup, and pickled vegetables',
-      price: 45.00,
+      id: 'tuna-sando-1',
+      name: 'Tuna Sando',
+      description: 'Delicioso sanduíche de atum com ingredientes frescos e molho especial. Uma experiência única da culinária japonesa moderna!',
+      price: null, // Preço pode variar, consulte no link
       currency: 'BRL',
       category: 'Japanese',
-      tags: ['sushi', 'japanese', 'seafood'],
-      restaurantName: 'Sushi Master',
+      tags: ['sando', 'tuna', 'japanese', 'donburizin'],
+      restaurantName: 'Donburizin',
       location: 'São Paulo, SP',
-      ifoodUrl: 'https://www.ifood.com.br/salmon-sashimi',
+      storeUrl: 'https://pedido.anota.ai/product/68a7837672a924a4a93bab41/0/donburizin',
       imageUrl: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
+    },
+  })
+
+  const spicySalmao = await prisma.foodItem.upsert({
+    where: { id: 'spicy-salmao-1' },
+    update: {},
+    create: {
+      id: 'spicy-salmao-1',
+      name: 'Spicy Salmão (6 pcs.)',
+      description: 'Seis peças de salmão temperado com molho picante especial. Perfeito para quem adora sabores intensos!',
+      price: null,
+      currency: 'BRL',
+      category: 'Japanese',
+      tags: ['sushi', 'salmon', 'spicy', 'japanese', 'donburizin'],
+      restaurantName: 'Donburizin',
+      location: 'São Paulo, SP',
+      storeUrl: 'https://pedido.anota.ai/product/68af6c731368a56a54cf6f24/0/donburizin',
+      imageUrl: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400',
+    },
+  })
+
+  const guiozaPorco = await prisma.foodItem.upsert({
+    where: { id: 'guioza-porco-1' },
+    update: {},
+    create: {
+      id: 'guioza-porco-1',
+      name: 'Guioza de Porco (4 unidades)',
+      description: 'Quatro unidades de guioza crocante recheado com porco temperado. Um clássico irresistível da culinária japonesa!',
+      price: null,
+      currency: 'BRL',
+      category: 'Japanese',
+      tags: ['gyoza', 'pork', 'japanese', 'donburizin', 'appetizer'],
+      restaurantName: 'Donburizin',
+      location: 'São Paulo, SP',
+      storeUrl: 'https://pedido.anota.ai/product/689cf8b8d239d61ecc8c5283/0/donburizin',
+      imageUrl: 'https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=400',
     },
   })
 
   console.log('✅ Created food items')
 
-  // Create more food items
-  const pasta = await prisma.foodItem.upsert({
-    where: { id: 'pasta-1' },
-    update: {},
-    create: {
-      id: 'pasta-1',
-      name: 'Carbonara Pasta',
-      description: 'Creamy pasta with bacon, eggs, and parmesan cheese',
-      price: 32.00,
-      currency: 'BRL',
-      category: 'Italian',
-      tags: ['pasta', 'italian', 'creamy'],
-      restaurantName: 'Trattoria Roma',
-      location: 'São Paulo, SP',
-      ifoodUrl: 'https://www.ifood.com.br/carbonara',
-      imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400',
-    },
-  })
-
-  const tacos = await prisma.foodItem.upsert({
-    where: { id: 'tacos-1' },
-    update: {},
-    create: {
-      id: 'tacos-1',
-      name: 'Beef Tacos',
-      description: 'Authentic Mexican tacos with seasoned beef, onions, and cilantro',
-      price: 18.90,
-      currency: 'BRL',
-      category: 'Mexican',
-      tags: ['tacos', 'mexican', 'beef'],
-      restaurantName: 'Taco Loco',
-      location: 'Rio de Janeiro, RJ',
-      ifoodUrl: 'https://www.ifood.com.br/beef-tacos',
-      imageUrl: 'https://images.unsplash.com/photo-1565299585323-38174c3d16f8?w=400',
-    },
-  })
-
-  // Delete existing videos to avoid unique constraint conflicts
-  // (since foodItemId is unique, we need to clear existing videos first)
+  // Clear existing videos
   await prisma.video.deleteMany({})
   console.log('🧹 Cleared existing videos')
 
-  // Create POSTS with food-related content (photos of dishes)
-  // This matches the validation goal: photos vs videos (A/B test)
-  // Here we seed with photos (contentType: 'photo') using high-quality dish images.
-  const video1 = await prisma.video.create({
+  // Create videos with real content from Donburizin
+  const videoTuna = await prisma.video.create({
     data: {
-      title: 'Making the Perfect Margherita Pizza',
-      description: 'Pizza Margherita com mozzarella e manjericão 🍕',
-      videoUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?auto=format&fit=crop&w=1080&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800',
-      duration: null,
-      creatorId: user1.id,
-      foodItemId: pizza.id,
-      contentType: 'photo',
-      likesCount: 150,
-      commentsCount: 23,
-      viewsCount: 1200,
-      sharesCount: 45,
-    },
-  })
-
-  const video2 = await prisma.video.create({
-    data: {
-      title: 'Gourmet Burger Recipe',
-      description: 'Hambúrguer artesanal suculento 🍔',
-      videoUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1080&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800',
-      duration: null,
-      creatorId: user2.id,
-      foodItemId: burger.id,
-      contentType: 'photo',
-      likesCount: 89,
-      commentsCount: 12,
-      viewsCount: 850,
-      sharesCount: 28,
-    },
-  })
-
-  const video3 = await prisma.video.create({
-    data: {
-      title: 'Fresh Salmon Sashimi',
-      description: 'Sashimi de salmão fresquinho 🍣',
-      videoUrl: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=1080&q=80',
+      title: 'Confira Tuna Sando de Donburizin',
+      description: 'Tuna Sando irresistível! 🍣 Peça agora e experimente o melhor da culinária japonesa 🥢',
+      videoUrl: '/videos/Tuna.mp4',
       thumbnailUrl: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800',
-      duration: null,
-      creatorId: user1.id,
-      foodItemId: sushi.id,
-      contentType: 'photo',
-      likesCount: 234,
-      commentsCount: 45,
-      viewsCount: 2100,
-      sharesCount: 67,
-    },
-  })
-
-  const video4 = await prisma.video.create({
-    data: {
-      title: 'Creamy Carbonara Pasta',
-      description: 'Carbonara cremosa (estilo italiano) 🍝',
-      videoUrl: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=1080&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800',
-      duration: null,
-      creatorId: user1.id,
-      foodItemId: pasta.id,
-      contentType: 'photo',
-      likesCount: 312,
+      duration: 30, // Ajuste conforme duração real
+      creatorId: donburizinChef.id,
+      foodItemId: tunaSando.id,
+      contentType: 'video',
+      likesCount: 342,
       commentsCount: 67,
-      viewsCount: 3400,
-      sharesCount: 89,
+      viewsCount: 4520,
+      sharesCount: 128,
     },
   })
 
-  const video5 = await prisma.video.create({
+  const videoSalmao = await prisma.video.create({
     data: {
-      title: 'Authentic Mexican Tacos',
-      description: 'Tacos de carne com ingredientes frescos 🌮',
-      videoUrl: 'https://images.unsplash.com/photo-1565299585323-38174c3d16f8?auto=format&fit=crop&w=1080&q=80',
-      thumbnailUrl: 'https://images.unsplash.com/photo-1565299585323-38174c3d16f8?w=800',
-      duration: null,
-      creatorId: user2.id,
-      foodItemId: tacos.id,
-      contentType: 'photo',
-      likesCount: 178,
-      commentsCount: 34,
-      viewsCount: 1650,
-      sharesCount: 52,
+      title: 'Confira Spicy Salmão (6 pcs.) de Donburizin',
+      description: 'Spicy Salmão fresquinho! 🌶️🍣 6 peças de pura delícia! Peça já no nosso app 🔥',
+      videoUrl: '/videos/Salmao.mp4',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=800',
+      duration: 25,
+      creatorId: donburizinChef.id,
+      foodItemId: spicySalmao.id,
+      contentType: 'video',
+      likesCount: 528,
+      commentsCount: 94,
+      viewsCount: 6830,
+      sharesCount: 201,
+    },
+  })
+
+  const videoGuioza = await prisma.video.create({
+    data: {
+      title: 'Confira Guioza de Porco (4 unidades) de Donburizin',
+      description: 'Guioza crocante de porco! 🥟 4 unidades perfeitas para começar sua refeição! 😋',
+      videoUrl: '/videos/Guioza.mp4',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1496116218417-1a781b1c416c?w=800',
+      duration: 20,
+      creatorId: donburizinChef.id,
+      foodItemId: guiozaPorco.id,
+      contentType: 'video',
+      likesCount: 419,
+      commentsCount: 82,
+      viewsCount: 5240,
+      sharesCount: 156,
     },
   })
 
   console.log('✅ Created videos')
 
-  // Create some likes
+  // Create some likes from the chef
   await prisma.like.createMany({
     data: [
-      { userId: user2.id, videoId: video1.id },
-      { userId: user1.id, videoId: video2.id },
+      { userId: donburizinChef.id, videoId: videoSalmao.id },
     ],
     skipDuplicates: true,
   })
@@ -238,18 +150,26 @@ async function main() {
     data: [
       {
         eventType: 'view',
-        videoId: video1.id,
+        videoId: videoTuna.id,
         contentType: 'video',
+        userId: donburizinChef.id,
       },
       {
         eventType: 'view',
-        videoId: video2.id,
+        videoId: videoSalmao.id,
         contentType: 'video',
+        userId: donburizinChef.id,
+      },
+      {
+        eventType: 'view',
+        videoId: videoGuioza.id,
+        contentType: 'video',
+        userId: donburizinChef.id,
       },
       {
         eventType: 'like',
-        userId: user2.id,
-        videoId: video1.id,
+        userId: donburizinChef.id,
+        videoId: videoSalmao.id,
         contentType: 'video',
       },
     ],
@@ -257,6 +177,13 @@ async function main() {
 
   console.log('✅ Created analytics events')
   console.log('🎉 Seeding completed!')
+  console.log('')
+  console.log('📹 Vídeos do Donburizin carregados:')
+  console.log('   1. Tuna Sando')
+  console.log('   2. Spicy Salmão (6 pcs.)')
+  console.log('   3. Guioza de Porco (4 unidades)')
+  console.log('')
+  console.log('🔗 Todos os links do pedido.anota.ai estão configurados!')
 }
 
 main()

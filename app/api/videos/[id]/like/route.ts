@@ -1,11 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// For demo purposes, using a default user ID
-// In production, get from authentication
-const getUserId = () => {
-  // TODO: Get from session/auth
-  return 'demo-user-id'
+const DEMO_USER = {
+  email: 'demo@foodreels.local',
+  username: 'food_reels_demo',
+  name: 'Food Reels Demo',
+  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=foodreels',
+}
+
+// Temporary auth shim: try to honor a provided user header; otherwise create/reuse a demo user.
+const getOrCreateUserId = async (request: NextRequest) => {
+  const headerUserId = request.headers.get('x-user-id')
+  if (headerUserId) {
+    const existing = await prisma.user.findUnique({ where: { id: headerUserId } })
+    if (existing) return existing.id
+  }
+
+  const headerEmail = request.headers.get('x-user-email')
+  if (headerEmail) {
+    const user = await prisma.user.upsert({
+      where: { email: headerEmail },
+      update: {},
+      create: {
+        email: headerEmail,
+        username: headerEmail.split('@')[0]?.replace(/[^a-zA-Z0-9_]/g, '_') || 'user',
+        name: headerEmail,
+      },
+    })
+    return user.id
+  }
+
+  const demoUser = await prisma.user.upsert({
+    where: { email: DEMO_USER.email },
+    update: {},
+    create: DEMO_USER,
+  })
+
+  return demoUser.id
 }
 
 export async function POST(
@@ -13,7 +44,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = getUserId()
+    const userId = await getOrCreateUserId(request)
     const videoId = params.id
 
     // Check if already liked
@@ -66,7 +97,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const userId = getUserId()
+    const userId = await getOrCreateUserId(request)
     const videoId = params.id
 
     // Check if liked
