@@ -16,7 +16,6 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: { restaurant: true },
       select: {
         id: true,
         email: true,
@@ -25,10 +24,10 @@ export async function GET() {
         avatar: true,
         bio: true,
         role: true,
-        restaurant: true,
         createdAt: true,
-      }
-    })
+        restaurant: true, 
+      },
+    });
 
     if (!user) {
       return NextResponse.json(
