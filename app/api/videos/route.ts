@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
-    const contentType = searchParams.get('contentType') // For A/B testing
+    const contentType = searchParams.get('contentType')
+    const my = searchParams.get('my') === 'true'
     const skip = (page - 1) * limit
 
     const where: any = {
@@ -15,6 +19,11 @@ export async function GET(request: NextRequest) {
 
     if (contentType) {
       where.contentType = contentType
+    }
+
+    // Filter by current user's videos
+    if (my && session?.user?.id) {
+      where.creatorId = session.user.id
     }
 
     const [videos, total] = await Promise.all([
@@ -60,6 +69,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const {
       title,
@@ -67,12 +85,11 @@ export async function POST(request: NextRequest) {
       videoUrl,
       thumbnailUrl,
       duration,
-      creatorId,
       foodItemId,
       contentType = 'video',
     } = body
 
-    if (!title || !videoUrl || !creatorId) {
+    if (!title || !videoUrl) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -86,7 +103,7 @@ export async function POST(request: NextRequest) {
         videoUrl,
         thumbnailUrl,
         duration,
-        creatorId,
+        creatorId: session.user.id,
         foodItemId: foodItemId || null,
         contentType,
       },
