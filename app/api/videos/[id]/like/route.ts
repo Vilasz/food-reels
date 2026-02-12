@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+// Force dynamic rendering for this API route
+export const dynamic = 'force-dynamic'
+
 const DEMO_USER = {
   email: 'demo@foodreels.local',
   username: 'food_reels_demo',
