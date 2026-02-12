@@ -6,6 +6,7 @@ const DEMO_USER = {
   username: 'food_reels_demo',
   name: 'Food Reels Demo',
   avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=foodreels',
+  password: '__TEMP_USER_NO_PASSWORD__', 
 }
 
 // Temporary auth shim: try to honor a provided user header; otherwise create/reuse a demo user.
@@ -25,6 +26,7 @@ const getOrCreateUserId = async (request: NextRequest) => {
         email: headerEmail,
         username: headerEmail.split('@')[0]?.replace(/[^a-zA-Z0-9_]/g, '_') || 'user',
         name: headerEmail,
+        password: '__TEMP_USER_NO_PASSWORD__', 
       },
     })
     return user.id

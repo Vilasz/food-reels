@@ -15,6 +15,7 @@ async function main() {
       name: 'Donburizin',
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=donburizin',
       bio: 'Culinária japonesa autêntica 🍣 | Peça já pelo nosso app!',
+      password: '__TEMP_USER_NO_PASSWORD__', // Placeholder for seed user
     },
   })
 
