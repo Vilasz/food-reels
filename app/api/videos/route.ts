@@ -8,6 +8,9 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    // Test database connection first
+    await prisma.$connect()
+    
     const session = await getServerSession(authOptions)
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1')
@@ -63,8 +66,22 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Error fetching videos:', error)
+    
+    // Provide more detailed error information
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorDetails = {
+      error: 'Failed to fetch videos',
+      message: errorMessage,
+      timestamp: new Date().toISOString(),
+    }
+    
+    // Log additional details for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error details:', errorDetails)
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to fetch videos' },
+      errorDetails,
       { status: 500 }
     )
   }
